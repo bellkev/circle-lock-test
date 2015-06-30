@@ -4,7 +4,7 @@ set -e
 
 if git rev-parse --abbrev-ref HEAD | grep --quiet $1; then
   shift
-  exec $@
+  eval $@
 else
   echo "Not on branch $1, skipping..."
 fi

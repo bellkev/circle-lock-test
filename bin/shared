@@ -17,5 +17,5 @@ wait-and-do() {
         sleep 5
     done
     shift
-    exec $@
+    eval $@
 }
