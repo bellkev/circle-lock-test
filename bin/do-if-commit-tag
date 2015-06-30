@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 if git log -1 --pretty=%B | grep --quiet "\[$1\]"; then
     shift
     exec $@

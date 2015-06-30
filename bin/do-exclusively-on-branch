@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 source shared
 
 do-if-branch $1 wait-and-do "--branch $1" ${@:2}
