@@ -10,6 +10,8 @@ assert-no-builds() {
     fi
 }
 
+export -f assert-no-builds
+
 # wait-and-do filter-flags do-args...
 wait-and-do() {
     set -o pipefail
