@@ -12,7 +12,8 @@ any-builds() {
 
 # wait-and-do filter-flags do-args...
 wait-and-do() {
-    while list-unfinished-builds $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME $1 \
+    while set -o pipefail && \
+          list-unfinished-builds $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME $1 \
                                  --after-build $CIRCLE_BUILD_NUM | xargs any-builds; do
         sleep 5
     done
