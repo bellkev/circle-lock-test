@@ -14,9 +14,10 @@ assert-no-builds() {
 wait-and-do() {
     while ! set -o pipefail && \
           list-unfinished-builds $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME $1 \
-                                 --after-build $CIRCLE_BUILD_NUM | xargs assert-no-builds; do
+                                 --before-build $CIRCLE_BUILD_NUM | xargs assert-no-builds; do
         echo "Retrying in 5 seconds..."
         sleep 5
     done
+    echo "Acquired \"lock\""
     "${@:2}"
 }

@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description='Process some integers.', add_help=
 parser.add_argument('urlish')
 parser.add_argument('--commit-tag')
 parser.add_argument('--branch')
-parser.add_argument('--after-build', type=int)
+parser.add_argument('--before-build', type=int)
 parser.add_argument('--circle-token')
 
 args = parser.parse_args()
@@ -28,7 +28,7 @@ builds = json.load(resp)
 
 # Some test data:
 # builds = [{'status': 'running', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 5},
-#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 4},
+#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 6},
 #           {'status': 'running', 'subject': 'foo [barz]', 'branch': 'master', 'build_num': 5},
 #           {'status': 'finished', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 5},
 #           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'foo', 'build_num': 5}]
@@ -43,7 +43,7 @@ def filter_tag(build):
     return not args.commit_tag or "[%s]" % args.commit_tag in build['subject']
 
 def filter_num(build):
-    return not args.after_build or build['build_num'] > args.after_build
+    return not args.before_build or build['build_num'] < args.before_build
 
 def filter_build(b):
     return filter_status(b) and filter_branch(b) and filter_tag(b) and filter_num(b)
