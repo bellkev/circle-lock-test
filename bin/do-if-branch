@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-source shared
+set -eu
 
 if git rev-parse --abbrev-ref HEAD | grep --quiet $1; then
   "${@:2}"

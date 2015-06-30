@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-
-source shared
+set -eu
 
 if git log -1 --pretty=%B | grep --quiet "\[$1\]"; then
   "${@:2}"
