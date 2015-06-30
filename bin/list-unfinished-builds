@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(description='Process some integers.', add_help=
 parser.add_argument('urlish')
 parser.add_argument('--commit-tag')
 parser.add_argument('--branch')
+parser.add_argument('--after-build', type=int)
 parser.add_argument('--circle-token')
 
 args = parser.parse_args()
@@ -26,10 +27,11 @@ resp = urllib2.urlopen(req)
 builds = json.load(resp)
 
 # Some test data:
-# builds = [{'status': 'running', 'subject': 'foo [bar]', 'branch': 'master'},
-#           {'status': 'running', 'subject': 'foo [barz]', 'branch': 'master'},
-#           {'status': 'finished', 'subject': 'foo [bar]', 'branch': 'master'},
-#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'foo'}]
+# builds = [{'status': 'running', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 5},
+#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 4},
+#           {'status': 'running', 'subject': 'foo [barz]', 'branch': 'master', 'build_num': 5},
+#           {'status': 'finished', 'subject': 'foo [bar]', 'branch': 'master', 'build_num': 5},
+#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'foo', 'build_num': 5}]
 
 def filter_status(build):
     return build['status'] in {'queued', 'scheduled', 'running'}
@@ -40,8 +42,11 @@ def filter_branch(build):
 def filter_tag(build):
     return not args.commit_tag or "[%s]" % args.commit_tag in build['subject']
 
-def filter_build(build):
-    return filter_status(build) and filter_branch(build) and filter_tag(build)
+def filter_num(build):
+    return not args.after_build or build['build_num'] > args.after_build
+
+def filter_build(b):
+    return filter_status(b) and filter_branch(b) and filter_tag(b) and filter_num(b)
 
 for build_num in [build['build_num'] for build in builds if filter_build(build)]:
     print build_num
