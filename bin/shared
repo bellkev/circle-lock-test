@@ -1,20 +1,20 @@
-any-builds() {
+assert-no-builds() {
     if [ $# -eq 0 ]; then
-        return 1
+        return 0
     else
         echo Waiting on builds:
         for build in $@; do
             echo "  $build"
         done
-        return 0
+        return 1
     fi
 }
 
 # wait-and-do filter-flags do-args...
 wait-and-do() {
-    while set -o pipefail && \
+    while ! set -o pipefail && \
           list-unfinished-builds $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME $1 \
-                                 --after-build $CIRCLE_BUILD_NUM | xargs any-builds; do
+                                 --after-build $CIRCLE_BUILD_NUM | xargs assert-no-builds; do
         sleep 5
     done
     "${@:2}"
