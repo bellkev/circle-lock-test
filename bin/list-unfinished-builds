@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+import os
+import urllib2
+
+parser = argparse.ArgumentParser(description='Process some integers.', add_help=True)
+
+parser.add_argument('urlish')
+parser.add_argument('--commit-tag')
+parser.add_argument('--branch')
+parser.add_argument('--circle-token')
+
+args = parser.parse_args()
+
+token = args.circle_token or os.environ['CIRCLE_TOKEN']
+
+url = "https://circleci.com/api/v1/project/%s?circle-token=%s&limit=10" % \
+      (args.urlish, token)
+
+req = urllib2.Request(url, None, {"Accept": "application/json"})
+
+resp = urllib2.urlopen(req)
+
+builds = json.load(resp)
+
+# Some test data:
+# builds = [{'status': 'running', 'subject': 'foo [bar]', 'branch': 'master'},
+#           {'status': 'running', 'subject': 'foo [barz]', 'branch': 'master'},
+#           {'status': 'finished', 'subject': 'foo [bar]', 'branch': 'master'},
+#           {'status': 'running', 'subject': 'foo [bar]', 'branch': 'foo'}]
+
+def filter_status(build):
+    return build['status'] in {'queued', 'scheduled', 'running'}
+
+def filter_branch(build):
+    return not args.branch or build['branch'] == args.branch
+
+def filter_tag(build):
+    return not args.commit_tag or "[%s]" % args.commit_tag in build['subject']
+
+def filter_build(build):
+    return filter_status(build) and filter_branch(build) and filter_tag(build)
+
+for build_num in [build['build_num'] for build in builds if filter_build(build)]:
+    print build_num
