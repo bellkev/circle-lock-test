@@ -2,7 +2,7 @@ assert-no-builds() {
     if [ $# -eq 0 ]; then
         return 0
     else
-        echo Waiting on builds:
+        echo "Waiting on builds:"
         for build in $@; do
             echo "  $build"
         done
