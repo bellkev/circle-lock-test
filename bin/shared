@@ -1,0 +1,21 @@
+any-builds() {
+    if [ $# -eq 0 ]; then
+        return 1
+    else
+        echo Waiting on builds:
+        for build in $@; do
+            echo "  $build"
+        done
+        return 0
+    fi
+}
+
+# wait-and-do filter-flags do-args...
+wait-and-do() {
+    while list-unfinished-builds $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME $1 \
+                                 --after-build $CIRCLE_BUILD_NUM | xargs any-builds; do
+        sleep 5
+    done
+    shift
+    exec $@
+}
