@@ -5,8 +5,7 @@ set -e
 source shared
 
 if git rev-parse --abbrev-ref HEAD | grep --quiet $1; then
-  shift
-  eval $@
+  "${@:2}"
 else
   echo "Not on branch $1, skipping..."
 fi

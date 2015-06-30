@@ -16,6 +16,5 @@ wait-and-do() {
                                  --after-build $CIRCLE_BUILD_NUM | xargs any-builds; do
         sleep 5
     done
-    shift
-    eval $@
+    "${@:2}"
 }
