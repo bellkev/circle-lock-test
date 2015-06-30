@@ -2,6 +2,8 @@
 
 set -e
 
+source shared
+
 if git log -1 --pretty=%B | grep --quiet "\[$1\]"; then
     shift
     eval $@

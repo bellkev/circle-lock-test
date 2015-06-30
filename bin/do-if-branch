@@ -2,6 +2,8 @@
 
 set -e
 
+source shared
+
 if git rev-parse --abbrev-ref HEAD | grep --quiet $1; then
   shift
   eval $@
