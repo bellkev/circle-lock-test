@@ -17,7 +17,7 @@ args = parser.parse_args()
 
 token = args.circle_token or os.environ['CIRCLE_TOKEN']
 
-url = "https://circleci.com/api/v1/project/%s?circle-token=%s&limit=10" % \
+url = "https://circleci.com/api/v1/project/%s?circle-token=%s&limit=100" % \
       (args.urlish, token)
 
 req = urllib2.Request(url, None, {"Accept": "application/json"})
