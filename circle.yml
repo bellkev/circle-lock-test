@@ -1,0 +1,7 @@
+machine:
+  environment:
+    PATH: $PATH:$HOME/circle-lock-test/bin
+
+test:
+  override:
+    - do-exclusively-on-branch master sleep 120
