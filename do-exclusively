@@ -22,12 +22,12 @@ while [[ $# -gt 0 ]]; do
     shift 2
 done
 
-if [[ -z $branch || "$CIRCLE_BRANCH" != "$branch" ]]; then
+if [[ $branch && "$CIRCLE_BRANCH" != "$branch" ]]; then
     echo "Not on branch $1. Skipping..."
     exit 0
 fi
 
-if [[ -z $tag || $(git log -1 --pretty=%B) != *\[$tag\]* ]]; then
+if [[ $tag && "$(git log -1 --pretty=%B)" != *\[$tag\]* ]]; then
     echo "No [$tag] commit tag found. Skipping..."
     exit 0
 fi
