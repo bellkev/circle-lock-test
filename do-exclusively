@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
 
 
-FOO="BAR"
-
-if [[ "$0" != *bats* ]]; then
-set -e
-set -u
-set -o pipefail
-
-    branch=""
-    tag=""
-
+# sets $branch, $tag, $rest
+parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -b|--branch) branch="$2" ;;
@@ -19,6 +11,19 @@ set -o pipefail
         esac
         shift 2
     done
+    rest=("$@")
+}
+
+if [[ "$0" != *bats* ]]; then
+set -e
+set -u
+set -o pipefail
+
+    branch=""
+    tag=""
+    rest=()
+
+    parse_args "$@"
 
     if [[ $branch && "$CIRCLE_BRANCH" != "$branch" ]]; then
         echo "Not on branch $branch. Skipping..."
@@ -61,5 +66,5 @@ set -o pipefail
 
     echo "Acquired lock"
 
-    "${@}"
+    "${rest[@]}"
 fi
