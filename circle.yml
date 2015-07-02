@@ -1,7 +1,6 @@
-machine:
-  environment:
-    PATH: $PATH:$HOME/circle-lock-test/bin
-
+dependencies:
+  override:
+    - curl -L -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5rc1/jq-linux-x86_64-static
 test:
   override:
-    - do-exclusively-with-tag staging sleep 120
+    - bin/do-exclusively-on-branch master sleep 120

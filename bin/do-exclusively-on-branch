@@ -2,4 +2,21 @@
 
 set -eu
 
-do-if-branch $1 wait-for-builds-and-do "--branch $1" "${@:2}"
+if [[ "$CIRCLE_BRANCH" != "$1" ]]; then
+    echo "Not on branch $1. Skipping..."
+    exit 0
+fi
+
+echo "Checking for running builds..."
+
+url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME?circle-token=$CIRCLE_TOKEN&limit=100"
+jq_prog=".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\")) and .branch == \"$1\") | .build_num"
+
+while curl -s -H "Accept: application/json" "$url" | jq "$jq_prog" | grep "."; do
+    echo "Waiting 5 seconds..."
+    sleep 5
+done
+
+echo "Acquired lock"
+
+"${@:2}"
