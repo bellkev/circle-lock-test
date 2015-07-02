@@ -9,15 +9,9 @@ tag=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -b|--branch)
-            branch="$2"
-        ;;
-        -t|--tag)
-            tag="$2"
-        ;;
-        *)
-            break
-        ;;
+        -b|--branch) branch="$2" ;;
+        -t|--tag) tag="$2" ;;
+        *) break ;;
     esac
     shift 2
 done
@@ -51,11 +45,11 @@ url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJEC
 
 while true; do
     builds=$(curl -s -H "Accept: application/json" "$url" | jq "$jq_prog")
-    if [[ -z $builds ]]; then
-        break
-    else
+    if [[ $builds ]]; then
         echo "Waiting on builds:"
         echo "$builds"
+    else
+        break
     fi
     echo "Retrying in 5 seconds..."
     sleep 5
