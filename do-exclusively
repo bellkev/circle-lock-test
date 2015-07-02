@@ -29,6 +29,23 @@ should_skip() {
     return 1
 }
 
+# reads $branch, $tag
+# sets $jq_prog
+make_jq_prog() {
+    local jq_filters=""
+
+    if [[ $branch ]]; then
+        jq_filters+=" and .branch == \"$branch\""
+    fi
+
+    if [[ $tag ]]; then
+        jq_filters+=" and (.subject | contains(\"[$tag]\"))"
+    fi
+
+    jq_prog=".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\")) $jq_filters) | .build_num"
+}
+
+
 if [[ "$0" != *bats* ]]; then
 set -e
 set -u
@@ -37,30 +54,17 @@ set -o pipefail
     branch=""
     tag=""
     rest=()
+    api_url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME?circle-token=$CIRCLE_TOKEN&limit=100"
 
     parse_args "$@"
     commit_message=$(git log -1 --pretty=%B)
     if should_skip; then exit 0; fi
+    make_jq_prog
 
     echo "Checking for running builds..."
 
-    jq_filters=""
-
-    if [[ $branch ]]; then
-        jq_filters+=" and .branch == \"$branch\""
-    fi
-
-    if [[ $tag ]]; then
-        jq_filters+=" and (.subject | contains(\"[$tag]\")"
-    fi
-
-    jq_prog=".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\")) $jq_filters) | .build_num"
-
-    url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME?circle-token=$CIRCLE_TOKEN&limit=100"
-
-
     while true; do
-        builds=$(curl -s -H "Accept: application/json" "$url" | jq "$jq_prog")
+        builds=$(curl -s -H "Accept: application/json" "$api_url" | jq "$jq_prog")
         if [[ $builds ]]; then
             echo "Waiting on builds:"
             echo "$builds"
