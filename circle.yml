@@ -3,4 +3,5 @@ dependencies:
     - curl -L -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5rc1/jq-linux-x86_64-static && chmod +x ~/bin/jq
 test:
   override:
+    - ./test.sh
     - ./do-exclusively --branch all-bash sleep 120
