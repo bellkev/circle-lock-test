@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
+set -u
+set -o pipefail
 
 if [[ "$CIRCLE_BRANCH" != "$1" ]]; then
     echo "Not on branch $1. Skipping..."
