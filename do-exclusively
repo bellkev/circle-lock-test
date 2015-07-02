@@ -14,6 +14,21 @@ parse_args() {
     rest=("$@")
 }
 
+# reads $branch, $tag, $commit_message
+should_skip() {
+    if [[ "$branch" && "$CIRCLE_BRANCH" != "$branch" ]]; then
+        echo "Not on branch $branch. Skipping..."
+        return 0
+    fi
+
+    if [[ "$tag" && "$commit_message" != *\[$tag\]* ]]; then
+        echo "No [$tag] commit tag found. Skipping..."
+        return 0
+    fi
+
+    return 1
+}
+
 if [[ "$0" != *bats* ]]; then
 set -e
 set -u
@@ -24,16 +39,8 @@ set -o pipefail
     rest=()
 
     parse_args "$@"
-
-    if [[ $branch && "$CIRCLE_BRANCH" != "$branch" ]]; then
-        echo "Not on branch $branch. Skipping..."
-        exit 0
-    fi
-
-    if [[ $tag && "$(git log -1 --pretty=%B)" != *\[$tag\]* ]]; then
-        echo "No [$tag] commit tag found. Skipping..."
-        exit 0
-    fi
+    commit_message=$(git log -1 --pretty=%B)
+    if should_skip; then exit 0; fi
 
     echo "Checking for running builds..."
 
