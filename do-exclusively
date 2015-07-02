@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $branch && "$CIRCLE_BRANCH" != "$branch" ]]; then
-    echo "Not on branch $1. Skipping..."
+    echo "Not on branch $branch. Skipping..."
     exit 0
 fi
 
