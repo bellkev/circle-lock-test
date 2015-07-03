@@ -1,14 +1,37 @@
 #!/usr/bin/env bats
 
 
-setup() {
-    source do-exclusively
-    test_data='[{ "build_num": 1, "status": "running", "branch": "foo", "subject": "Has [bar] tag"},
-                { "build_num": 2, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"},
-                { "build_num": 3, "status": "queued", "branch": "foo", "subject": "Has [bar] tag"},
-                { "build_num": 4, "status": "pending", "branch": "foo", "subject": "No tag"},
-                { "build_num": 5, "status": "pending", "branch": "not-foo", "subject": "Has [bar] tag"},
-                { "build_num": 6, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"}]'
+
+source do-exclusively
+
+test_data='[{ "build_num": 1, "status": "running", "branch": "foo", "subject": "Has [bar] tag"},
+            { "build_num": 2, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"},
+            { "build_num": 3, "status": "queued", "branch": "foo", "subject": "Has [bar] tag"},
+            { "build_num": 4, "status": "pending", "branch": "foo", "subject": "No tag"},
+            { "build_num": 5, "status": "pending", "branch": "not-foo", "subject": "Has [bar] tag"},
+            { "build_num": 6, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"}]'
+
+curl() {
+    if [[ -e curl_data/1 ]]; then
+        cat curl_data/1
+        rm curl_data/1
+    else
+        cat curl_data/2
+    fi
+}
+
+git() {
+    echo $git_data
+}
+
+sleep() {
+    echo "sleep"
+}
+
+export -f curl git sleep
+
+teardown() {
+    rm -rf curl_data
 }
 
 @test "pargse_args branch" {
@@ -89,4 +112,17 @@ setup() {
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
     [[ "$result" == 1?2?3 ]]
+}
+
+
+@test "e2e" {
+    mkdir curl_data
+    echo "$test_data" > curl_data/1
+    echo "[]" > curl_data/2
+    git_data="Tagged with [bar]"
+    export curl_response_1 curl_response_2 git_data
+    CIRCLE_PROJECT_USERNAME=foo CIRCLE_PROJECT_REPONAME=bar CIRCLE_BUILD_NUM=6 \
+                           CIRCLE_TOKEN=abc run ./do-exclusively --tag bar echo foo
+    expected="Checking for running builds... Waiting on builds: 1 2 3 5 Retrying in 5 seconds... sleep Acquired lock foo "
+    [[ $(echo "$output" | tr '\n' ' ') == "$expected" ]]
 }

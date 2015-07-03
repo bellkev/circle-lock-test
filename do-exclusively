@@ -77,5 +77,7 @@ set -o pipefail
 
     echo "Acquired lock"
 
-    "${rest[@]}"
+    if [[ "${#rest[@]}" -ne 0 ]]; then
+        "${rest[@]}"
+    fi
 fi
