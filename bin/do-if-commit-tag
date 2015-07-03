@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -eu
-
-if git log -1 --pretty=%B | grep --quiet "\[$1\]"; then
-  "${@:2}"
-else
-    echo "No [$1] commit tag found. Skipping..."
-fi

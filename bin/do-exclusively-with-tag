@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-set -eu
-
-do-if-commit-tag $1 wait-for-builds-and-do "--commit-tag $1" "${@:2}"

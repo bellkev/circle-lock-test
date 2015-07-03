@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-set -eu
-
-do-if-branch $1 wait-for-builds-and-do "--branch $1" "${@:2}"

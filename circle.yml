@@ -1,7 +1,9 @@
-machine:
-  environment:
-    PATH: $PATH:$HOME/circle-lock-test/bin
-
+dependencies:
+  override:
+    - sudo apt-add-repository -y ppa:duggan/bats
+    - sudo apt-get update; sudo apt-get install -y bats
+    - curl -L -o ~/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5rc1/jq-linux-x86_64-static && chmod +x ~/bin/jq
 test:
   override:
-    - do-exclusively-with-tag staging sleep 120
+    - ./test.sh
+    - ./do-exclusively --branch all-bash sleep 120
