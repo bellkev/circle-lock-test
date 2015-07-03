@@ -86,7 +86,7 @@ teardown() {
     CIRCLE_BUILD_NUM=6
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
-    [[ "$result" == 1?2?3?4?5 ]]
+    [[ "$result" == $'1\n2\n3\n4\n5' ]]
 }
 
 @test "filter on branch" {
@@ -94,7 +94,7 @@ teardown() {
     branch=foo
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
-    [[ "$result" == 1?2?3?4 ]]
+    [[ "$result" == $'1\n2\n3\n4' ]]
 }
 
 @test "filter on tag" {
@@ -102,7 +102,7 @@ teardown() {
     tag=bar
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
-    [[ "$result" == 1?2?3?5 ]]
+    [[ "$result" == $'1\n2\n3\n5' ]]
 }
 
 @test "filter on tag and branch" {
@@ -111,7 +111,7 @@ teardown() {
     branch=foo
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
-    [[ "$result" == 1?2?3 ]]
+    [[ "$result" == $'1\n2\n3' ]]
 }
 
 
@@ -123,6 +123,6 @@ teardown() {
     export curl_response_1 curl_response_2 git_data
     CIRCLE_PROJECT_USERNAME=foo CIRCLE_PROJECT_REPONAME=bar CIRCLE_BUILD_NUM=6 \
                            CIRCLE_TOKEN=abc run ./do-exclusively --tag bar echo foo
-    expected="Checking for running builds... Waiting on builds: 1 2 3 5 Retrying in 5 seconds... sleep Acquired lock foo "
-    [[ $(echo "$output" | tr '\n' ' ') == "$expected" ]]
+    expected=$'Checking for running builds...\nWaiting on builds:\n1\n2\n3\n5\nRetrying in 5 seconds...\nsleep\nAcquired lock\nfoo'
+    [[ "$output" == "$expected" ]]
 }
