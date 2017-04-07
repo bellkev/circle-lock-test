@@ -7,6 +7,7 @@ parse_args() {
         case $1 in
             -b|--branch) branch="$2" ;;
             -t|--tag) tag="$2" ;;
+            -c|--cancel) cancel="$2" ;;
             *) break ;;
         esac
         shift 2
@@ -24,6 +25,15 @@ should_skip() {
     if [[ "$tag" && "$commit_message" != *\[$tag\]* ]]; then
         echo "No [$tag] commit tag found. Skipping..."
         return 0
+    fi
+
+    return 1
+}
+
+# reads $cancel
+should_cancel() {
+    if [[ "$cancel" ]]; then
+      return 0
     fi
 
     return 1
@@ -65,7 +75,9 @@ set -o pipefail
 
     while true; do
         builds=$(curl -s -H "Accept: application/json" "$api_url" | jq "$jq_prog")
-        if [[ $builds ]]; then
+        if should_cancel; then
+            echo "Cancelling build."
+        else if [[ $builds ]]; then
             echo "Waiting on builds:"
             echo "$builds"
         else
