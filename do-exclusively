@@ -3,14 +3,21 @@
 
 # sets $branch, $tag, $rest
 parse_args() {
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-            -b|--branch) branch="$2" ;;
-            -t|--tag) tag="$2" ;;
-            -c|--cancel) cancel="$2" ;;
-            *) break ;;
+    while true ; do
+        case "$1" in
+            -b|--branch)
+                case "$2" in
+                    "") shit 2 ;;
+                    *) branch="$2" ; shift 2 ;;
+                esac ;;
+            -t|--tag)
+                case "$2" in
+                    "") shit 2 ;;
+                    *) tag="$2" ; shift 2 ;;
+                esac ;;
+            -c|--cancel) cancel=1 ; shift ;;
+            --) shift ; break ;;
         esac
-        shift 2
     done
     rest=("$@")
 }
@@ -64,7 +71,11 @@ set -o pipefail
     branch=""
     tag=""
     rest=()
+    cancel=0
     api_url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME?circle-token=$CIRCLE_TOKEN&limit=100"
+
+    TEMP=`getopt -o b:ct: --long branch:,cancel,tag: -n 'do-exclusively' -- "$@"`
+    eval set -- "$TEMP"
 
     parse_args "$@"
     commit_message=$(git log -1 --pretty=%B)
@@ -75,9 +86,12 @@ set -o pipefail
 
     while true; do
         builds=$(curl -s -H "Accept: application/json" "$api_url" | jq "$jq_prog")
-        if should_cancel; then
-            echo "Cancelling build."
-        else if [[ $builds ]]; then
+        if [[ $builds ]]; then
+            if should_cancel; then
+                echo "Cancelling build."
+                exit 1
+            fi
+
             echo "Waiting on builds:"
             echo "$builds"
         else
