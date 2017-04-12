@@ -5,16 +5,8 @@
 parse_args() {
     while true ; do
         case "$1" in
-            -b|--branch)
-                case "$2" in
-                    "") shit 2 ;;
-                    *) branch="$2" ; shift 2 ;;
-                esac ;;
-            -t|--tag)
-                case "$2" in
-                    "") shit 2 ;;
-                    *) tag="$2" ; shift 2 ;;
-                esac ;;
+            -b|--branch) branch="$2" ; shift 2 ;;
+            -t|--tag) tag="$2" ; shift 2 ;;
             -c|--cancel) cancel=1 ; shift ;;
             --) shift ; break ;;
         esac
