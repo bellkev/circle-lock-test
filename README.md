@@ -11,7 +11,7 @@ There are currently a couple of prerequisites for using the `do-exclusively` scr
 
 ## Usage
 
-`do-exclusively --branch <somebranch> --tag <sometag> echo "whatever commands I want"`
+`do-exclusively --branch <somebranch> --tag <sometag> --job <somejob> echo "whatever commands I want"`
 The branch and tag arguments are both optional and limit the scope of the command and its lock to a given branch
 name or builds whose commit message contains a certain commit message. If neither option is used,
 the wrapped command will run on every build of the project and will wait for any other builds of the
@@ -28,3 +28,8 @@ other builds tagged [smoketest] finish before this action begins.
 
 Only run on builds on the `staging` branch, and wait for all other `staging` branch builds
 to finish before running.
+
+`do-exclusively --job terraform-plan --job terraform-apply terraform plan > out.plan`
+
+Only wait for jobs with the names `terraform-plan` and `terraform-apply` to
+finish before running.
