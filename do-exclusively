@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 
-# sets $branch, $tag, $rest
+# sets $branch, $tag, $rest, $workflow 
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -b|--branch) branch="$2" ;;
             -t|--tag) tag="$2" ;;
+            -w|--workflow) workflow="$2" ;;
             *) break ;;
         esac
         shift 2
@@ -42,6 +43,10 @@ make_jq_prog() {
         jq_filters+=" and (.subject | contains(\"[$tag]\"))"
     fi
 
+    if [[ $workflow ]]; then
+        jq_filters+=" and (.workflows.workflow_name | test(\"$workflow\"))"
+    fi
+
     jq_prog=".[] | select(.build_num < $CIRCLE_BUILD_NUM and (.status | test(\"running|pending|queued\")) $jq_filters) | .build_num"
 }
 
@@ -53,6 +58,7 @@ set -o pipefail
 
     branch=""
     tag=""
+    workflow=""
     rest=()
     api_url="https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME?circle-token=$CIRCLE_TOKEN&limit=100"
 

@@ -4,12 +4,12 @@
 
 source do-exclusively
 
-test_data='[{ "build_num": 1, "status": "running", "branch": "foo", "subject": "Has [bar] tag"},
-            { "build_num": 2, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"},
-            { "build_num": 3, "status": "queued", "branch": "foo", "subject": "Has [bar] tag"},
-            { "build_num": 4, "status": "pending", "branch": "foo", "subject": "No tag"},
-            { "build_num": 5, "status": "pending", "branch": "not-foo", "subject": "Has [bar] tag"},
-            { "build_num": 6, "status": "pending", "branch": "foo", "subject": "Has [bar] tag"}]'
+test_data='[{ "build_num": 1, "status": "running", "branch": "foo", "workflows": {"workflow_name": "develop"}, "subject": "Has [bar] tag"},
+            { "build_num": 2, "status": "pending", "branch": "foo", "workflows": {"workflow_name": "develop"}, "subject": "Has [bar] tag"},
+            { "build_num": 3, "status": "queued", "branch": "foo", "workflows": {"workflow_name": "develop"}, "subject": "Has [bar] tag"},
+            { "build_num": 4, "status": "pending", "branch": "foo", "workflows": {"workflow_name": "prod"}, "subject": "No tag"},
+            { "build_num": 5, "status": "pending", "branch": "not-foo", "workflows": {"workflow_name": "develop"}, "subject": "Has [bar] tag"},
+            { "build_num": 6, "status": "pending", "branch": "foo", "workflows": {"workflow_name": "develop"}, "subject": "Has [bar] tag"}]'
 
 curl() {
     if [[ -e curl_data/1 ]]; then
@@ -100,6 +100,22 @@ teardown() {
 @test "filter on tag" {
     CIRCLE_BUILD_NUM=6
     tag=bar
+    make_jq_prog
+    result=$(echo $test_data | jq "$jq_prog")
+    [[ "$result" == $'1\n2\n3\n5' ]]
+}
+
+@test "allow new workflow" {
+    CIRCLE_BUILD_NUM=6
+    workflow=qa
+    make_jq_prog
+    result=$(echo $test_data | jq "$jq_prog")
+    [[ "$result" == $'' ]]
+}
+
+@test "filter on workflow" {
+    CIRCLE_BUILD_NUM=6
+    workflow=develop
     make_jq_prog
     result=$(echo $test_data | jq "$jq_prog")
     [[ "$result" == $'1\n2\n3\n5' ]]
